@@ -1,4 +1,4 @@
-package async_parser
+package sync_greedy_parser
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	ethereum_jsonrpc_models "github.com/bluntenpassant/ethereum_subscriber/internal/app/client/ethereum-jsonrpc/models"
 	"github.com/bluntenpassant/ethereum_subscriber/internal/app/models"
 	"sync"
-	"sync/atomic"
 )
 
 type EthereumJsonRPCClient interface {
@@ -17,8 +16,11 @@ type EthereumJsonRPCClient interface {
 }
 
 type SubscriberRepository interface {
+	GetTransactionsReversed(ctx context.Context, address string) ([]*models.Transaction, error)
 	AddNewSubscriber(ctx context.Context, subscriber models.Subscriber) error
 	GetSubscriberByAddress(ctx context.Context, address string) (models.Subscriber, error)
+	GetLastTransaction(ctx context.Context, address string) (*models.Transaction, error)
+	AddTransactions(ctx context.Context, address string, txs []*models.Transaction) error
 }
 
 type BlockRepository interface {
@@ -90,12 +92,7 @@ func (p *Parser) GetTransactions(ctx context.Context, address string) ([]*models
 
 	txCount := uint64(currentTxCountResp.Nonce) - subscriber.SubscribeTxCount
 
-	var addressTxCountAtomic uint64
-
-	atomic.StoreUint64(&addressTxCountAtomic, txCount)
-
-	transactions := make([]*models.Transaction, 0, addressTxCountAtomic)
-	transactionMx := sync.Mutex{}
+	transactions := make([]*models.Transaction, 0, txCount)
 
 	var txPool = sync.Pool{
 		New: func() interface{} {
@@ -103,67 +100,52 @@ func (p *Parser) GetTransactions(ctx context.Context, address string) ([]*models
 		},
 	}
 
-	wg := sync.WaitGroup{}
-
-	errChan := make(chan error, txCount+1)
-
-	for i := uint64(currentBlockNumberResp.BlockNumber); i >= subscriber.SubscribeBlockNumber; i-- {
-		wg.Add(1)
-		go func(blockNumber uint64) {
-			defer wg.Done()
-
-			blockResp, err := p.ethereumJsonRPCClient.GetBlockByNumber(&ethereum_jsonrpc.GetBlockByNumberReq{
-				BlockNumber: ethereum_jsonrpc_models.HexUint64(blockNumber),
-				IsGetFullTx: true,
-			})
-			if err != nil {
-				errChan <- err
-				return
-			}
-
-			if blockNumber == uint64(currentBlockNumberResp.BlockNumber) {
-				err = p.blockRepository.SetMaxCurrentBlock(ctx, blockNumber)
-				if err != nil {
-					errChan <- err
-					return
-				}
-			}
-
-			for j := len(blockResp.Block.Transactions) - 1; j >= 0 && atomic.LoadUint64(&addressTxCountAtomic) > 0; j-- {
-				tx := blockResp.Block.Transactions[j]
-				if tx.From == address || tx.To == address {
-					transactionMx.Lock()
-					transaction := txPool.Get().(*models.Transaction)
-					*transaction = *models.ConvertJsonRPCTxToInternal(tx)
-					transactions = append(transactions, transaction)
-					transactionMx.Unlock()
-
-					atomic.AddUint64(&addressTxCountAtomic, ^uint64(0))
-				}
-			}
-		}(i)
+	lastTx, err := p.subscriberRepository.GetLastTransaction(ctx, address)
+	if err != nil {
+		return nil, err
 	}
 
-	wg.Wait()
+	for i := uint64(currentBlockNumberResp.BlockNumber); i >= subscriber.SubscribeBlockNumber && (txCount > 0); i-- {
+		blockNumber := i
 
-	var errorMsg string
+		blockResp, err := p.ethereumJsonRPCClient.GetBlockByNumber(&ethereum_jsonrpc.GetBlockByNumberReq{
+			BlockNumber: ethereum_jsonrpc_models.HexUint64(blockNumber),
+			IsGetFullTx: true,
+		})
+		if err != nil {
+			return nil, err
+		}
 
-	var done bool
-	for !done {
-		select {
-		case err := <-errChan:
+		if blockNumber == uint64(currentBlockNumberResp.BlockNumber) {
+			err = p.blockRepository.SetMaxCurrentBlock(ctx, blockNumber)
 			if err != nil {
-				errorMsg += "Error: " + err.Error() + "\n"
+				return nil, err
 			}
-		default:
-			done = true
-			break
+		}
+
+		for j := len(blockResp.Block.Transactions) - 1; j >= 0 && txCount > 0; j-- {
+			tx := blockResp.Block.Transactions[j]
+			if i == subscriber.SubscribeBlockNumber && lastTx != nil && (uint64(tx.TransactionIndex) < lastTx.TransactionIndex) {
+				continue
+			}
+			if tx.From == address || tx.To == address {
+				transaction := txPool.Get().(*models.Transaction)
+				*transaction = *models.ConvertJsonRPCTxToInternal(tx)
+				transactions = append(transactions, transaction)
+
+				txCount--
+			}
 		}
 	}
 
-	if errorMsg != "" {
-		return nil, errors.New(errorMsg)
+	models.ReverseTransactionsByLink(transactions)
+
+	err = p.subscriberRepository.AddTransactions(ctx, address, transactions)
+	if err != nil {
+		return nil, err
 	}
 
-	return transactions, nil
+	sharedTransactions, err := p.subscriberRepository.GetTransactionsReversed(ctx, address)
+
+	return sharedTransactions, nil
 }

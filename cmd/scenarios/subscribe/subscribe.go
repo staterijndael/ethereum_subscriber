@@ -2,6 +2,7 @@ package subscribe
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -15,7 +16,7 @@ const scenarioNumber = 2
 const addressLength = 42
 
 type IParserService interface {
-	Subscribe(address string) error
+	Subscribe(ctx context.Context, address string) error
 }
 
 type SubscribeScenario struct {
@@ -36,7 +37,7 @@ func (s *SubscribeScenario) GetScenarioNumber() int {
 	return scenarioNumber
 }
 
-func (s *SubscribeScenario) Present(reader *bufio.Reader) error {
+func (s *SubscribeScenario) Present(ctx context.Context, reader *bufio.Reader) error {
 	fmt.Println("Enter subscribe address: ")
 	subscribeAddress, _ := reader.ReadString('\n')
 	subscribeAddress = strings.TrimSpace(subscribeAddress)
@@ -47,7 +48,7 @@ func (s *SubscribeScenario) Present(reader *bufio.Reader) error {
 		return errors.New("address length should be " + strconv.Itoa(addressLength))
 	}
 
-	err := s.parserService.Subscribe(subscribeAddress)
+	err := s.parserService.Subscribe(ctx, subscribeAddress)
 	if err != nil {
 		return err
 	}

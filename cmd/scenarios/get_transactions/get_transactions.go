@@ -2,6 +2,7 @@ package get_transactions
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/bluntenpassant/ethereum_subscriber/internal/app/models"
@@ -12,7 +13,7 @@ const scenarioName = "getTransactions"
 const scenarioNumber = 3
 
 type IParserService interface {
-	GetTransactions(address string) ([]*models.Transaction, error)
+	GetTransactions(ctx context.Context, address string) ([]*models.Transaction, error)
 }
 
 type GetTransactionsScenario struct {
@@ -33,14 +34,14 @@ func (s *GetTransactionsScenario) GetScenarioNumber() int {
 	return scenarioNumber
 }
 
-func (s *GetTransactionsScenario) Present(reader *bufio.Reader) error {
+func (s *GetTransactionsScenario) Present(ctx context.Context, reader *bufio.Reader) error {
 	fmt.Println("Enter subscriber address: ")
 	subscriberAddress, _ := reader.ReadString('\n')
 	subscriberAddress = strings.TrimSpace(subscriberAddress)
 	subscriberAddress = strings.TrimRight(subscriberAddress, "\n")
 	subscriberAddress = strings.ToLower(subscriberAddress)
 
-	transactions, err := s.parserService.GetTransactions(subscriberAddress)
+	transactions, err := s.parserService.GetTransactions(ctx, subscriberAddress)
 	if err != nil {
 		return err
 	}

@@ -1,11 +1,11 @@
 package sync_parser
 
 import (
+	"context"
 	"errors"
 	ethereum_jsonrpc "github.com/bluntenpassant/ethereum_subscriber/internal/app/client/ethereum-jsonrpc"
 	ethereum_jsonrpc_models "github.com/bluntenpassant/ethereum_subscriber/internal/app/client/ethereum-jsonrpc/models"
 	"github.com/bluntenpassant/ethereum_subscriber/internal/app/models"
-	"math/big"
 	"sync"
 )
 
@@ -16,13 +16,13 @@ type EthereumJsonRPCClient interface {
 }
 
 type SubscriberRepository interface {
-	AddNewSubscriber(subscriber models.Subscriber) error
-	GetSubscriberByAddress(address string) (models.Subscriber, error)
+	AddNewSubscriber(ctx context.Context, subscriber models.Subscriber) error
+	GetSubscriberByAddress(ctx context.Context, address string) (models.Subscriber, error)
 }
 
 type BlockRepository interface {
-	SetMaxCurrentBlock(newCurrentBlock uint64)
-	GetCurrentBlock() uint64
+	SetMaxCurrentBlock(ctx context.Context, newCurrentBlock uint64) error
+	GetCurrentBlock(ctx context.Context) (uint64, error)
 }
 
 type Parser struct {
@@ -39,13 +39,13 @@ func NewParser(ethereumJsonRPCClient EthereumJsonRPCClient, subscriberRepository
 	}
 }
 
-func (p *Parser) GetCurrentBlock() uint64 {
-	currentBlock := p.blockRepository.GetCurrentBlock()
+func (p *Parser) GetCurrentBlock(ctx context.Context) (uint64, error) {
+	currentBlock, err := p.blockRepository.GetCurrentBlock(ctx)
 
-	return currentBlock
+	return currentBlock, err
 }
 
-func (p *Parser) Subscribe(address string) error {
+func (p *Parser) Subscribe(ctx context.Context, address string) error {
 	blockNumberResp, err := p.ethereumJsonRPCClient.GetBlockNumber()
 	if err != nil {
 		return errors.New("error getting current block number cause: " + err.Error())
@@ -59,7 +59,7 @@ func (p *Parser) Subscribe(address string) error {
 		return err
 	}
 
-	err = p.subscriberRepository.AddNewSubscriber(models.Subscriber{
+	err = p.subscriberRepository.AddNewSubscriber(ctx, models.Subscriber{
 		Address:              address,
 		SubscribeBlockNumber: uint64(blockNumberResp.BlockNumber),
 		SubscribeTxCount:     uint64(txCountResp.Nonce),
@@ -68,8 +68,8 @@ func (p *Parser) Subscribe(address string) error {
 	return err
 }
 
-func (p *Parser) GetTransactions(address string) ([]*models.Transaction, error) {
-	subscriber, err := p.subscriberRepository.GetSubscriberByAddress(address)
+func (p *Parser) GetTransactions(ctx context.Context, address string) ([]*models.Transaction, error) {
+	subscriber, err := p.subscriberRepository.GetSubscriberByAddress(ctx, address)
 	if err != nil {
 		return nil, err
 	}
@@ -100,9 +100,8 @@ func (p *Parser) GetTransactions(address string) ([]*models.Transaction, error) 
 	for i := uint64(currentBlockNumberResp.BlockNumber); i >= subscriber.SubscribeBlockNumber && (txCount > 0); i-- {
 		blockNumber := i
 
-		bigBlockNumber := new(big.Int).SetUint64(blockNumber)
 		blockResp, err := p.ethereumJsonRPCClient.GetBlockByNumber(&ethereum_jsonrpc.GetBlockByNumberReq{
-			BlockNumber: ethereum_jsonrpc_models.HexBigInt(*bigBlockNumber),
+			BlockNumber: ethereum_jsonrpc_models.HexUint64(blockNumber),
 			IsGetFullTx: true,
 		})
 		if err != nil {
@@ -110,7 +109,10 @@ func (p *Parser) GetTransactions(address string) ([]*models.Transaction, error) 
 		}
 
 		if blockNumber == uint64(currentBlockNumberResp.BlockNumber) {
-			p.blockRepository.SetMaxCurrentBlock(blockNumber)
+			err = p.blockRepository.SetMaxCurrentBlock(ctx, blockNumber)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		for j := len(blockResp.Block.Transactions) - 1; j >= 0 && txCount > 0; j-- {

@@ -1,0 +1,35 @@
+version: "2.2"
+services:
+  db:
+    image: postgres:15.1-alpine
+    restart: "no"
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - ethereum_subscriber_loc
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ethereum_subscriber
+      POSTGRES_PASSWORD: 123
+  redis:
+    image: "redis:7.0.5-alpine"
+    restart: "no"
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+    - redis_data:/data
+    - redis_config:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - ethereum_subscriber_loc
+
+networks:
+  ethereum_subscriber_loc:
+
+volumes:
+  db_data:
+  redis_data:
+  redis_config:

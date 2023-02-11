@@ -1,44 +1,27 @@
-package async_memory_repository
+package sync_greedy_memory_repository
 
-import (
-	"context"
-	"sync"
-)
+import "context"
 
 type BlockRepository struct {
-	currentBlock   uint64
-	currentBlockMx sync.RWMutex
+	currentBlock uint64
 }
 
 func NewBlockRepository() *BlockRepository {
 	return &BlockRepository{
-		currentBlock:   0,
-		currentBlockMx: sync.RWMutex{},
+		currentBlock: 0,
 	}
 }
 
 func (r *BlockRepository) SetMaxCurrentBlock(ctx context.Context, newCurrentBlock uint64) error {
-	r.currentBlockMx.RLock()
-
 	if newCurrentBlock > r.currentBlock {
-		r.currentBlockMx.RUnlock()
-
-		r.currentBlockMx.Lock()
 		r.currentBlock = newCurrentBlock
-		r.currentBlockMx.Unlock()
-
-		return nil
 	}
-
-	r.currentBlockMx.RUnlock()
 
 	return nil
 }
 
 func (r *BlockRepository) GetCurrentBlock(ctx context.Context) (uint64, error) {
-	r.currentBlockMx.RLock()
 	currentBlock := r.currentBlock
-	r.currentBlockMx.RUnlock()
 
 	return currentBlock, nil
 }

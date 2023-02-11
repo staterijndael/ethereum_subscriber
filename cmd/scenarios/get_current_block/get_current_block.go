@@ -2,6 +2,7 @@ package get_current_block
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 )
@@ -10,7 +11,7 @@ const scenarioName = "GetCurrentBlock"
 const scenarioNumber = 1
 
 type IParserService interface {
-	GetCurrentBlock() uint64
+	GetCurrentBlock(ctx context.Context) (uint64, error)
 }
 
 type GetCurrentBlockScenario struct {
@@ -31,8 +32,11 @@ func (s *GetCurrentBlockScenario) GetScenarioNumber() int {
 	return scenarioNumber
 }
 
-func (s *GetCurrentBlockScenario) Present(reader *bufio.Reader) error {
-	currentBlock := s.parserService.GetCurrentBlock()
+func (s *GetCurrentBlockScenario) Present(ctx context.Context, reader *bufio.Reader) error {
+	currentBlock, err := s.parserService.GetCurrentBlock(ctx)
+	if err != nil {
+		return err
+	}
 	if currentBlock == 0 {
 		return errors.New("current block is not parsed yet")
 	}

@@ -1,6 +1,7 @@
 package async_memory_repository
 
 import (
+	"context"
 	"errors"
 	"github.com/bluntenpassant/ethereum_subscriber/internal/app/models"
 	"sync"
@@ -18,7 +19,7 @@ func NewSubscriberRepository() *SubscriberRepository {
 	}
 }
 
-func (r *SubscriberRepository) AddNewSubscriber(subscriber models.Subscriber) error {
+func (r *SubscriberRepository) AddNewSubscriber(ctx context.Context, subscriber models.Subscriber) error {
 	r.subscribersMx.Lock()
 	defer r.subscribersMx.Unlock()
 
@@ -31,7 +32,7 @@ func (r *SubscriberRepository) AddNewSubscriber(subscriber models.Subscriber) er
 	return nil
 }
 
-func (r *SubscriberRepository) GetSubscriberByAddress(address string) (models.Subscriber, error) {
+func (r *SubscriberRepository) GetSubscriberByAddress(ctx context.Context, address string) (models.Subscriber, error) {
 	r.subscribersMx.RLock()
 	defer r.subscribersMx.RUnlock()
 

@@ -44,3 +44,45 @@ func ConvertJsonRPCTxToInternal(tx *ethereum_jsonrpc.Transaction) *Transaction {
 		S:                big.Int(tx.S),
 	}
 }
+
+func ReverseTransactionsByLink(txs []*Transaction) {
+	left := 0
+	right := len(txs) - 1
+
+	for left < right {
+		tmp := txs[left]
+		txs[left] = txs[right]
+		txs[right] = tmp
+
+		left++
+		right--
+	}
+}
+
+func ReverseTransactionsCopy(txs []*Transaction) []*Transaction {
+	if len(txs) == 0 {
+		return []*Transaction{}
+	}
+	newTxs := make([]*Transaction, len(txs))
+
+	left := 0
+	right := len(txs) - 1
+
+	for left < right {
+		copyLeft := *txs[left]
+		copyRight := *txs[right]
+
+		newTxs[left] = &copyRight
+		newTxs[right] = &copyLeft
+
+		left++
+		right--
+	}
+
+	if len(txs)%2 != 0 {
+		tmp := *txs[len(txs)/2]
+		newTxs[len(txs)/2] = &tmp
+	}
+
+	return newTxs
+}

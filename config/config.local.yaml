@@ -3,3 +3,12 @@ ethereum_jsonrpc:
   version: 2.0
 general:
   processing: sync
+  approach: greedy
+  storage: redis
+storage:
+  redis:
+    host: localhost:6379
+    password: ""
+    db: 0
+
+    data_keep_alive_duration: 3h

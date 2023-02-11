@@ -8,7 +8,7 @@ import (
 const getBlockByNumberRPCName = "eth_getBlockByNumber"
 
 type GetBlockByNumberReq struct {
-	BlockNumber models.HexBigInt
+	BlockNumber models.HexUint64
 	IsGetFullTx bool
 }
 
