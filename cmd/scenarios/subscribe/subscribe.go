@@ -5,8 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bluntenpassant/ethereum_subscriber/internal/app/utils"
 	"strconv"
-	"strings"
 	"unicode/utf8"
 )
 
@@ -40,9 +40,7 @@ func (s *SubscribeScenario) GetScenarioNumber() int {
 func (s *SubscribeScenario) Present(ctx context.Context, reader *bufio.Reader) error {
 	fmt.Println("Enter subscribe address: ")
 	subscribeAddress, _ := reader.ReadString('\n')
-	subscribeAddress = strings.TrimSpace(subscribeAddress)
-	subscribeAddress = strings.TrimRight(subscribeAddress, "\n")
-	subscribeAddress = strings.ToLower(subscribeAddress)
+	subscribeAddress = utils.ClearString(subscribeAddress)
 
 	if utf8.RuneCountInString(subscribeAddress) != 42 {
 		return errors.New("address length should be " + strconv.Itoa(addressLength))

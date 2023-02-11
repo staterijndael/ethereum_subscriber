@@ -4,7 +4,10 @@ ethereum_jsonrpc:
 general:
   processing: sync
   approach: greedy
-  storage: redis
+  storage: memory
+http:
+  host: 0.0.0.0
+  port: 8080
 storage:
   redis:
     host: localhost:6379

@@ -1,4 +1,4 @@
-package sync_greedy_redis_repository
+package greedy_redis_repository
 
 import (
 	"context"

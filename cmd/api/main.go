@@ -1,19 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"github.com/bluntenpassant/ethereum_subscriber/cmd"
 	"github.com/bluntenpassant/ethereum_subscriber/config"
+	"github.com/bluntenpassant/ethereum_subscriber/internal/app/handlers"
 	redis_driver "github.com/bluntenpassant/ethereum_subscriber/internal/drivers/redis"
 	redis2 "github.com/redis/go-redis/v9"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
-	"log"
-	"os"
-	"strconv"
-	"strings"
 )
 
 func main() {
@@ -47,14 +43,12 @@ func main() {
 		}
 	}
 
-	reader := bufio.NewReader(os.Stdin)
-
 	container := cmd.NewContainer()
 	container.Init(redis, internalConfig)
 
-	presentScenariosByParams := container.GetPresentScenarioByParams(reader)
+	getServiceByParams := container.GetServiceByParams()
 
-	presentScenario, ok := presentScenariosByParams[cmd.ModeParams{
+	parserService, ok := getServiceByParams[cmd.ModeParams{
 		Approach:   internalConfig.General.Approach,
 		Processing: internalConfig.General.Processing,
 		Storage:    internalConfig.General.Storage,
@@ -64,40 +58,8 @@ func main() {
 		return
 	}
 
-	presentScenario.Init()
+	httpHandler := handlers.NewHandler(parserService)
 
-	content, err := os.ReadFile("./cmd/hello_text")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%s\n\n\n", content)
-
-	for {
-		// Read user input from the terminal
-		fmt.Print("Enter a name or number of method: ")
-		methodNumberOrName, _ := reader.ReadString('\n')
-		methodNumberOrName = strings.TrimRight(methodNumberOrName, "\n")
-		fmt.Println()
-
-		if num, err := strconv.Atoi(methodNumberOrName); err == nil {
-			err = presentScenario.PresentScenarioByNum(ctx, num)
-			if err != nil {
-				fmt.Println("Error: " + err.Error())
-				fmt.Println()
-			}
-
-			fmt.Println()
-			continue
-		}
-
-		err = presentScenario.PresentScenarioByName(ctx, methodNumberOrName)
-		if err != nil {
-			fmt.Println("Error: " + err.Error())
-			fmt.Println()
-			continue
-		}
-
-		fmt.Println()
-	}
+	fmt.Println("HTTP Server started...")
+	httpHandler.Start(internalConfig.Http)
 }

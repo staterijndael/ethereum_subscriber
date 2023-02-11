@@ -1,4 +1,4 @@
-package async_memory_repository
+package greedy_memory_repository
 
 import (
 	"context"

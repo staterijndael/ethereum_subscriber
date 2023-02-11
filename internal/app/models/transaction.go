@@ -5,6 +5,7 @@ import (
 	"math/big"
 )
 
+// swagger:model Transaction
 type Transaction struct {
 	BlockHash        string  `json:"blockHash"`
 	BlockNumber      uint64  `json:"blockNumber"`

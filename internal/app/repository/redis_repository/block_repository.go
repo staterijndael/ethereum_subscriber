@@ -1,4 +1,4 @@
-package sync_redis_repository
+package redis_repository
 
 import (
 	"context"

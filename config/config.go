@@ -25,6 +25,7 @@ type Config struct {
 	EthereumJsonRPC EthereumJsonRPC `yaml:"ethereum_jsonrpc"`
 	General         General         `yaml:"general"`
 	Storage         Storage         `yaml:"storage"`
+	Http            Http            `yaml:"http"`
 }
 
 type EthereumJsonRPC struct {
@@ -48,4 +49,9 @@ type Redis struct {
 	DB       int    `yaml:"db"`
 
 	DataKeepAliveDuration time.Duration `yaml:"data_keep_alive_duration"`
+}
+
+type Http struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }

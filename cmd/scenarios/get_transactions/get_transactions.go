@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bluntenpassant/ethereum_subscriber/internal/app/models"
-	"strings"
+	"github.com/bluntenpassant/ethereum_subscriber/internal/app/utils"
 )
 
 const scenarioName = "getTransactions"
@@ -37,9 +37,7 @@ func (s *GetTransactionsScenario) GetScenarioNumber() int {
 func (s *GetTransactionsScenario) Present(ctx context.Context, reader *bufio.Reader) error {
 	fmt.Println("Enter subscriber address: ")
 	subscriberAddress, _ := reader.ReadString('\n')
-	subscriberAddress = strings.TrimSpace(subscriberAddress)
-	subscriberAddress = strings.TrimRight(subscriberAddress, "\n")
-	subscriberAddress = strings.ToLower(subscriberAddress)
+	subscriberAddress = utils.ClearString(subscriberAddress)
 
 	transactions, err := s.parserService.GetTransactions(ctx, subscriberAddress)
 	if err != nil {
