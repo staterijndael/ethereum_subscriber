@@ -1,0 +1,5 @@
+ethereum_jsonrpc:
+  host: https://cloudflare-eth.com
+  version: 2.0
+general:
+  processing: sync

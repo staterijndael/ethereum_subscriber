@@ -1,0 +1,25 @@
+********************************************************************************
+*                                                                              *
+* Welcome to the Ethereum Subscriber CLI!                                     *
+*                                                                              *
+* This CLI provides three methods for interacting with Ethereum transactions:  *
+*                                                                              *
+* 1. GetCurrentBlock:                                                          *
+*    Returns the last parsed block from all parsed transactions.              *
+*    Usage: GetCurrentBlock                                                    *
+*    Returns: Integer                                                          *
+*                                                                              *
+* 2. Subscribe:                                                                *
+*    Subscribes an address to listen for transactions since subscription time.  *
+*    Usage: Subscribe [address]                                                *
+*    Returns: Boolean                                                          *
+*                                                                              *
+* 3. GetTransactions:                                                          *
+*    Gets a list of all transactions for a subscribed address since subscription time.  *
+*    Usage: GetTransactions                                                    *
+*    Returns: List of transaction objects. Transaction object format is described on www.xxx.com.  *
+*                                                                              *
+* To get started, simply type the name or number of the method you wish to use  *
+* and follow the instructions.                                                 *
+*                                                                              *
+********************************************************************************
