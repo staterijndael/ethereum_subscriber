@@ -5,10 +5,6 @@ Ethereum Network
 
 <img alt="gopher-in-glasses" src="doc/8.png" width="300">
 
-
-Automated builds are available for stable releases and the unstable master branch. Binary
-archives are published at https://geth.ethereum.org/downloads/.
-
 ## Install
 
 Current implementation provide 2 usage interface: CLI and HTTP Api
