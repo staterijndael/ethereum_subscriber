@@ -35,6 +35,8 @@ func main() {
 
 	var redis *redis2.Client
 
+	// Check if our current storage is redis then we will create redis client, otherwise
+	// here could be error cause unable to connect to redis, because we are using redis.Ping() inside
 	if internalConfig.General.Storage == config.RedisStorage {
 		redis, err = redis_driver.NewRedisClient(ctx, &redis2.Options{
 			Addr:     internalConfig.Storage.Redis.Host,
@@ -47,13 +49,19 @@ func main() {
 		}
 	}
 
+	// Init reader for further user input reading in different interfaces. We are trying to read input in main entrance
+	// and pass it after in scenario interface to further handling depending on user input
 	reader := bufio.NewReader(os.Stdin)
 
+	// Init container with all helper services and repositories for further pass into usecase layer
 	container := cmd.NewContainer()
 	container.Init(redis, internalConfig)
 
+	// Map that contains all application scenarios with services by 3 main parameters that can mutate current scenario choice.
+	// Depends on this 3 parameters we choose convenient scneario for current usecase layer.
 	presentScenariosByParams := container.GetPresentScenarioByParams(reader)
 
+	// Pass 3 main parameters for user cli scenario choice
 	presentScenario, ok := presentScenariosByParams[cmd.ModeParams{
 		Approach:   internalConfig.General.Approach,
 		Processing: internalConfig.General.Processing,
@@ -64,6 +72,7 @@ func main() {
 		return
 	}
 
+	// Init user cli scenaior for further showing
 	presentScenario.Init()
 
 	content, err := os.ReadFile("./cmd/hello_text")
@@ -80,6 +89,7 @@ func main() {
 		methodNumberOrName = strings.TrimRight(methodNumberOrName, "\n")
 		fmt.Println()
 
+		// If user input represented as a method number, then handle it as a number
 		if num, err := strconv.Atoi(methodNumberOrName); err == nil {
 			err = presentScenario.PresentScenarioByNum(ctx, num)
 			if err != nil {
@@ -91,6 +101,7 @@ func main() {
 			continue
 		}
 
+		// Otherwise, if user input is a method name, handle it as a string
 		err = presentScenario.PresentScenarioByName(ctx, methodNumberOrName)
 		if err != nil {
 			fmt.Println("Error: " + err.Error())

@@ -71,6 +71,27 @@ func (p *Parser) Subscribe(ctx context.Context, address string) error {
 	return err
 }
 
+// GetTransactions uses for a getting a full list of inbound or outbounds transactions by user since subscription.
+// Due to simple transactions in Ethereum Network are not indexed, we cannot get it through simple JSONRPC methods.
+// This method uses heuristic approach without having to process the entire chain.
+// Algorithm:
+// 1. Get current block number in ethereum network to set up point to which we must search and block number in a moment of last parsed block (currentBlockNumber, lastBlockNumber).
+// 2. Get count of inbound or outbound transactions in current moment and in a moment of last parsed txCount related to user (currentTxCount, lastTxCount)
+// 3. txCount (count of transactions that should be handled in a future starting from last parsed time) = currentTxCount - lastTxCount
+// 4. Iterate in range currentBlockNumber..lastBlockNumber and get all transactions for every block where from==address or to==address until txCount > 0
+// NOTE 1*: method starting loop from currentBlockNumber to lastBlockNumber, because we have a gap from currentBlockNumber,
+// because we could start our subscription not from start transaction for block
+// Example: transaction count in every block = 3 (blockSize), blockCount = 10, currentBlockNumber = 10,
+// lastBlockNumber = 1 (1-indexed block numbers in this example), lastTxCount = 2, currentTxCount = 28
+// txCount = 26, if we iterate from 1 block and 1 transaction then we will catch transaction 1..27 instead of 3..29,
+// so we need to start from transaction 3 (subscriptionTxCount + 1), but if we had a lastTxCount > blockSize
+// then we need to find our starting transaction first, it is a little annoying
+// it is much easier to iterate from last block because we will already have reversed order, and we don`t need to count transactions
+// NOTE 2*: as opposed to SyncParser (Releasing Approach) approach Greedy implies saving already parsed transaction,
+// we can afford it due to Ethereum transaction immutability promise (https://ethereum.org/en/developers/docs/transactions/#:~:text=As%20time%20passes,billions%20of%20dollars.)
+// this method might require distributed storage (like Redis or PostgreSQL) instead of default memory storage
+// but it might significantly increase performance due to keeping already parsed transactions.
+// This approach aimed at long-term program execution with long lifetime.
 func (p *Parser) GetTransactions(ctx context.Context, address string) ([]*models.Transaction, error) {
 	subscriber, err := p.subscriberRepository.GetSubscriberByAddress(ctx, address)
 	if err != nil {

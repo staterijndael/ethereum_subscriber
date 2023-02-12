@@ -49,8 +49,6 @@ func (h *Handler) getTransactions(w http.ResponseWriter, r *http.Request) {
 
 	address = utils.ClearString(address)
 
-	address = utils.ClearString(address)
-
 	transactions, err := h.parser.GetTransactions(ctx, address)
 	if err != nil {
 		h.sendErrResponse(w, err, http.StatusBadRequest)

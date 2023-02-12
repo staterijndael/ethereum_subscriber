@@ -13,7 +13,7 @@ type GetCurrentBlockResp struct {
 	CurrentBlock uint64 `json:"current_block"`
 }
 
-// swagger:route GET /get_current_block admin getCurrentBlock
+// swagger:route GET /get_current_block getCurrentBlock
 // Returns last parsed block between all transactions.
 // NOTE: Current block is not attached to last parsed transaction
 // and indicates only block number that was handled by internal parser

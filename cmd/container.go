@@ -17,12 +17,20 @@ import (
 	redis2 "github.com/redis/go-redis/v9"
 )
 
+// This code defines the architecture for a service that parses user requests for transactions and other data.
+// The main interface for the parser service is IParserService,
+// which contains three methods: GetCurrentBlock, GetTransactions, and Subscribe.
+
+// IParserService interface of representation of parser that will be using for handling user request
 type IParserService interface {
 	GetCurrentBlock(ctx context.Context) (uint64, error)
 	GetTransactions(ctx context.Context, address string) ([]*models.Transaction, error)
 	Subscribe(ctx context.Context, address string) error
 }
 
+// The Container struct holds references to all the different parser services,
+// including an asynchronous parser service and four different synchronous parser services,
+// each with different configurations for approach and storage.
 type Container struct {
 	asyncParserService           *async_parser.Parser
 	syncParserService            *sync_parser.Parser
@@ -31,16 +39,20 @@ type Container struct {
 	syncGreedyRedisParserService *sync_greedy_parser.Parser
 }
 
+// NewContainer function returns a pointer to a new, empty Container object.
 func NewContainer() *Container {
 	return &Container{}
 }
 
+// ModeParams contains
 type ModeParams struct {
 	Approach   config.ApproachParam
 	Processing config.ProcessingParam
 	Storage    config.StorageParam
 }
 
+// GetServiceByParams method maps different processing, approach, and storage combinations
+// to the appropriate parser service within the Container.
 func (c *Container) GetServiceByParams() map[ModeParams]IParserService {
 	presentScenarioByParams := map[ModeParams]IParserService{
 		ModeParams{
@@ -77,6 +89,8 @@ func (c *Container) GetServiceByParams() map[ModeParams]IParserService {
 	return presentScenarioByParams
 }
 
+// GetPresentScenarioByParams method maps different processing, approach,
+// and storage combinations to instances of the Scenarios struct.
 func (c *Container) GetPresentScenarioByParams(reader *bufio.Reader) map[ModeParams]*scenarios.Scenarios {
 	presentScenarioByParams := map[ModeParams]*scenarios.Scenarios{
 		ModeParams{
@@ -113,6 +127,9 @@ func (c *Container) GetPresentScenarioByParams(reader *bufio.Reader) map[ModePar
 	return presentScenarioByParams
 }
 
+// The Init method initializes the different repositories for subscriber and block data for the different parser services,
+// including those for memory and Redis storage.
+// The method takes a Redis client and a configuration object as inputs and sets up the repositories accordingly.
 func (c *Container) Init(redis *redis2.Client, config config.Config) {
 	asyncSubscriberRepository := memory_repository.NewSubscriberRepository()
 	asyncBlockRepository := memory_repository.NewBlockRepository()

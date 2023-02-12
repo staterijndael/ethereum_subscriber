@@ -7,20 +7,47 @@ import (
 
 // swagger:model Transaction
 type Transaction struct {
-	BlockHash        string  `json:"blockHash"`
-	BlockNumber      uint64  `json:"blockNumber"`
-	From             string  `json:"from"`
-	Gas              big.Int `json:"gas"`
-	GasPrice         big.Int `json:"gasPrice"`
-	Hash             string  `json:"hash"`
-	Input            string  `json:"input"`
-	Nonce            uint64  `json:"nonce"`
-	To               string  `json:"to"`
-	TransactionIndex uint64  `json:"transactionIndex"`
-	Value            big.Int `json:"value"`
-	V                big.Int `json:"v"`
-	R                big.Int `json:"r"`
-	S                big.Int `json:"s"`
+	// BlockHash is the hash of the block that this transaction belongs to
+	BlockHash string `json:"blockHash"`
+
+	// BlockNumber is the number of the block that this transaction belongs to
+	BlockNumber uint64 `json:"blockNumber"`
+
+	// From is the address of the account that initiated the transaction
+	From string `json:"from"`
+
+	// Gas is the amount of gas used by the transaction
+	Gas big.Int `json:"gas"`
+
+	// GasPrice is the price of gas used by the transaction
+	GasPrice big.Int `json:"gasPrice"`
+
+	// Hash is the transaction hash
+	Hash string `json:"hash"`
+
+	// Input is the input data for the transaction
+	Input string `json:"input"`
+
+	// Nonce is the nonce of the account that initiated the transaction
+	Nonce uint64 `json:"nonce"`
+
+	// To is the address of the account that the transaction was sent to
+	To string `json:"to"`
+
+	// TransactionIndex is the index of the transaction in the block
+	TransactionIndex uint64 `json:"transactionIndex"`
+
+	// Value is the amount of Ether transferred in the transaction
+	Value big.Int `json:"value"`
+
+	// V is the Ethereum network protocol version
+	V big.Int `json:"v"`
+
+	// R is a component of the signature of the transaction
+	R big.Int `json:"r"`
+
+	// S is a component of the signature of the transaction
+	S big.Int `json:"s"`
 }
 
 func ConvertJsonRPCTxToInternal(tx *ethereum_jsonrpc.Transaction) *Transaction {

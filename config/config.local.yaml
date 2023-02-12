@@ -1,12 +1,28 @@
 ethereum_jsonrpc:
+  # host for sending requests through Ethereum JSONRPC Api (https://ethereum.org/en/developers/docs/apis/json-rpc/)
   host: https://cloudflare-eth.com
+  # current Ethereum JSONRPC Api version
   version: 2.0
 general:
+  # parameter defines handling mode for data in services.
+  # sync - all data will be handled consequentially one by one
+  # async - all data will be handled as a partitions divided by blocks in Ethereum Network that could be useful
+  # if you need to handle a log of data in one iteration
   processing: sync
+  # parameter defines approach for handling data
+  # releasing - everytime service will get all user transactions since subscribe period in one burst
+  # it could be useful if you have short program lifetime and don`t need to handle huge array of data
+  # with this usecase data will be handled a little faster cause you don`t need to carry about data saving and safety about it
+  # all data handling in one iteration and releases after
   approach: greedy
+  # parameter defines storage that will be used for keeping data
+  # redis - subscriber will use redis for saving data.
+  # note: you need to provide credentials for redis service in below storage section
   storage: memory
 http:
+  # host that using for http api server
   host: 0.0.0.0
+  # port that using for http api server
   port: 8080
 storage:
   redis:

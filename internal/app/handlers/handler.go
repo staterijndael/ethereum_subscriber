@@ -63,13 +63,12 @@ func (h *Handler) Start(httpConfig config.Http) {
 }
 
 func (h *Handler) sendOKResponse(w http.ResponseWriter, resp []byte) {
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
 
 func (h *Handler) sendErrResponse(w http.ResponseWriter, err error, status int) {
 	w.WriteHeader(status)
-	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(err.Error()))
 }

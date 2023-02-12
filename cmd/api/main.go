@@ -31,6 +31,8 @@ func main() {
 
 	var redis *redis2.Client
 
+	// Check if our current storage is redis then we will create redis client, otherwise
+	// here could be error cause unable to connect to redis, because we are using redis.Ping() inside
 	if internalConfig.General.Storage == config.RedisStorage {
 		redis, err = redis_driver.NewRedisClient(ctx, &redis2.Options{
 			Addr:     internalConfig.Storage.Redis.Host,
@@ -43,9 +45,12 @@ func main() {
 		}
 	}
 
+	// Init container with all helper services and repositories for further pass into usecase layer
 	container := cmd.NewContainer()
 	container.Init(redis, internalConfig)
 
+	// Map that contains all application services by 3 main parameters that can mutate current service choice.
+	// Depends on this 3 parameters we choose convenient service for current usecase layer
 	getServiceByParams := container.GetServiceByParams()
 
 	parserService, ok := getServiceByParams[cmd.ModeParams{
@@ -58,6 +63,7 @@ func main() {
 		return
 	}
 
+	// Init http handler. This handler acts as usecase (http://prof.mau.ac.ir/images/Uploaded_files/Clean%20Architecture_%20A%20Craftsman%E2%80%99s%20Guide%20to%20Software%20Structure%20and%20Design-Pearson%20Education%20(2018)%5B7615523%5D.PDF) layer here
 	httpHandler := handlers.NewHandler(parserService)
 
 	fmt.Println("HTTP Server started...")

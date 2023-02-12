@@ -5,26 +5,39 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/bluntenpassant/ethereum_subscriber/internal/app/utils"
+	"github.com/gorilla/mux"
 	"net/http"
-	"strings"
 )
 
+// swagger:model SubscribeResp
 type SubscribeResp struct {
 	IsOK bool `json:"is_ok"`
 }
 
+// swagger:operation GET /subscribe/{address} subscribe
+// ---
+// summary: Subscribe address for a listening new transactions
+// description: Set up listening for address. Transactions available for getting through /get_transactions/{address} method
+// parameters:
+// - name: address
+//   in: path
+//   description: Ethereum address
+//   type: string
+//   required: true
+// responses:
+//   200:
+//     description: Is everything ok status
+//     schema:
+//       $ref: "#/definitions/SubscribeResp"
+
 func (h *Handler) subscribe(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	path := r.URL.Path
-	parts := strings.Split(path, "/")
-	if len(parts) == 0 {
-		h.sendErrResponse(w, errors.New("incorrect address url"), http.StatusBadRequest)
-		return
+	vars := mux.Vars(r)
+	address, ok := vars["address"]
+	if !ok {
+		h.sendErrResponse(w, errors.New("address is not provided"), http.StatusBadRequest)
 	}
-	address := parts[len(parts)-1]
-
-	address = utils.ClearString(address)
 
 	address = utils.ClearString(address)
 
