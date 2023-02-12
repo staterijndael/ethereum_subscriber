@@ -7,7 +7,7 @@ Ethereum Network
 
 ## Install
 
-Current implementation provide 2 usage interface: CLI and HTTP Api
+Current implementation provide 2 usage interfaces: CLI and HTTP Api
 
 ### CLI
 
