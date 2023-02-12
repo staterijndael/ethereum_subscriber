@@ -72,7 +72,11 @@ Approach does not consume many resources and might work fast enough, cause handl
 save data in distributed storage everytime, it saves only minimum data about subscription block and count of
 transactions, you can use memory storage for this approach. In config this approach is chosen
 by default, because this approach require few resources and does not require distributed side storages. But if you are planning to keep program long keepalive time
-`Greedy approach` will be more convenient and effective for you
+`Greedy approach` will be more convenient and effective for you.
+In average Ethereum Network has 25 TPS(Transaction Per Second) and has 110 bytes per transaction (https://ethereum.stackexchange.com/questions/30175/what-is-the-size-bytes-of-a-simple-ethereum-transaction-versus-a-bitcoin-trans)
+So, our load is 3KB per second. In a computer with 4GB RAM we will die in 1kk second (4GB/4KB) = 11.5 days.
+You should consider, that calculated load presented for 1 subscriber with linear traffic, for more subscribers
+and async requests you will die much faster
 
 <img alt="gopher-in-glasses" src="doc/releasing_approach.png" width="851" height="696">
 
