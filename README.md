@@ -60,7 +60,7 @@ Now Ethereum Subscriber supports two different approaches in transactions handli
 You can change current approach with parameter `General->Approach`
 
 Subscriber uses for a getting a full list of inbound or outbounds transactions by user since subscription.
-Due to simple transactions in Ethereum Network are not indexed, we cannot get it through simple JSONRPC methods.
+Due to simple transactions in Ethereum Network are not indexed, we cannot get it through simple JSONRPC methods directly, in 1 request.
 This method uses heuristic approach without having to process the entire chain.
 
 ### Releasing
