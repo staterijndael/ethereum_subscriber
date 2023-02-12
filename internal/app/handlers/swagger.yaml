@@ -1,0 +1,57 @@
+definitions:
+    GetCurrentBlockResp:
+        x-go-package: github.com/bluntenpassant/ethereum_subscriber/internal/app/handlers
+    GetTransactionsResp:
+        x-go-package: github.com/bluntenpassant/ethereum_subscriber/internal/app/handlers
+    SubscribeResp:
+        x-go-package: github.com/bluntenpassant/ethereum_subscriber/internal/app/handlers
+    Transaction:
+        x-go-package: github.com/bluntenpassant/ethereum_subscriber/internal/app/models
+info: {}
+paths:
+    /get_current_block:
+        get:
+            description: |-
+                NOTE: Current block is not attached to last parsed transaction
+                and indicates only block number that was handled by internal parser
+            operationId: getCurrentBlock
+            responses:
+                "200":
+                    description: GetCurrentBlockResp
+                    schema:
+                        $ref: '#/definitions/GetCurrentBlockResp'
+            summary: Returns last parsed block between all transactions.
+    /get_transactions/{address}:
+        get:
+            description: Returns all history of transactions for a given address since subscribe until memory storage is cleaned.
+            operationId: getTransactions
+            parameters:
+                - description: Ethereum address
+                  in: path
+                  name: address
+                  required: true
+                  type: string
+                  x-go-name: Address
+            responses:
+                "200":
+                    description: A list of transactions for the specified address
+                    schema:
+                        $ref: '#/definitions/GetTransactionsResp'
+            summary: Get list of transaction by address that already listening
+    /subscribe/{address}:
+        get:
+            description: Set up listening for address. Transactions available for getting through /get_transactions/{address} method
+            operationId: subscribe
+            parameters:
+                - description: Ethereum address
+                  in: path
+                  name: address
+                  required: true
+                  type: string
+            responses:
+                "200":
+                    description: Is everything ok status
+                    schema:
+                        $ref: '#/definitions/SubscribeResp'
+            summary: Subscribe address for a listening new transactions
+swagger: "2.0"
