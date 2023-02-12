@@ -20,7 +20,7 @@ after you can open user-cli with command
 ethereum_subscriber-cli
 ```
 
-### API 
+### API
 
 To install API and use it just install it through go install too
 ```shell
@@ -30,6 +30,13 @@ go install github.com/bluntenpassant/ethereum_subscriber/cmd/ethereum_subscriber
 after you can launch HTTP api server with command
 ```shell
 ethereum_subscriber-api
+```
+
+or you can use it as docker image. Dockerfile located in docker/Dockerfile
+commands for running Dockerfile presented below
+```shell
+docker build -o ethereum_subscriber ./docker
+docker run ethereum_subscriber -p 8080:8080
 ```
 
 NOTE: If you need to change app configuration that might be
