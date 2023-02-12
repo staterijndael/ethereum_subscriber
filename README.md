@@ -63,8 +63,8 @@ another task
 This approach will be suitable in case when you're launching program in a short-term.
 Approach does not consume many resources and might work fast enough, cause handler does not need to 
 save data in distributed storage everytime, it saves only minimum data about subscription block and count of
-transactions, you can use memory storage for this approach. But if you`re planning to keep program long keepalive time
-Greedy approach will be more convenient and effective for you
+transactions, you can use memory storage for this approach. But if you are planning to keep program long keepalive time
+`Greedy approach` will be more convenient and effective for you
 
 <img alt="gopher-in-glasses" src="doc/releasing_approach.png" width="851" height="696">
 
