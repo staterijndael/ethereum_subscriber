@@ -10,7 +10,7 @@ RUN go get -d -v ./...
 # Install the package
 RUN go install -v ./...
 
-RUN go build -o /ethereum_subscriber ./cmd/api
+RUN go build -o /ethereum_subscriber ./cmd/ethereum_subscriber-api
 
 EXPOSE 8080
 

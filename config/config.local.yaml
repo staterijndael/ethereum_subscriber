@@ -20,9 +20,9 @@ general:
   # note: you need to provide credentials for redis service in below storage section
   storage: memory
 http:
-  # host that using for http api server
+  # host that using for http ethereum_subscriber-api server
   host: 0.0.0.0
-  # port that using for http api server
+  # port that using for http ethereum_subscriber-api server
   port: 8080
 storage:
   redis:

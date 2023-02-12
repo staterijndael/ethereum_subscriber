@@ -61,7 +61,7 @@ func main() {
 	// Depends on this 3 parameters we choose convenient scneario for current usecase layer.
 	presentScenariosByParams := container.GetPresentScenarioByParams(reader)
 
-	// Pass 3 main parameters for user cli scenario choice
+	// Pass 3 main parameters for user ethereum_subscriber-cli scenario choice
 	presentScenario, ok := presentScenariosByParams[cmd.ModeParams{
 		Approach:   internalConfig.General.Approach,
 		Processing: internalConfig.General.Processing,
@@ -72,7 +72,7 @@ func main() {
 		return
 	}
 
-	// Init user cli scenaior for further showing
+	// Init user ethereum_subscriber-cli scenaior for further showing
 	presentScenario.Init()
 
 	content, err := os.ReadFile("./cmd/hello_text")
