@@ -93,7 +93,7 @@ func (r *SubscriberRepository) AddTransactions(ctx context.Context, address stri
 	if len(internalTxs) == 0 {
 		subscribeBlockNumber = subscriber.SubscribeBlockNumber
 	} else {
-		subscribeBlockNumber = internalTxs[len(r.subscriberTxs)-1].BlockNumber
+		subscribeBlockNumber = internalTxs[len(internalTxs)-1].BlockNumber
 	}
 
 	// Write lock on subscribers to safely access and modify the map
